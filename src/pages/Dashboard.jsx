@@ -67,18 +67,38 @@ const Dashboard = () => {
 
   useEffect(() => {
     const now = new Date();
-    let newStart;
+    let newStart, newEnd;
 
     switch (timeRange) {
-      case 'today': newStart = startOfToday(); break;
-      case 'thisWeek': newStart = startOfWeek(now, { weekStartsOn: 1 }); break;
-      case 'thisMonth': newStart = startOfMonth(now); break;
-      case 'thisYear': newStart = startOfYear(now); break;
-      default: newStart = startOfMonth(now);
+      case 'today':
+        newStart = new Date('2025-05-31T00:00:00');
+        newEnd = new Date('2025-05-31T23:59:59');
+      break;
+
+      case 'thisWeek':
+        newStart = new Date('2025-05-25T00:00:00');
+        newEnd = new Date('2025-05-31T23:59:59');
+        break;
+
+      case 'thisMonth':
+        newStart = new Date('2025-05-01T00:00:00');
+        newEnd = new Date('2025-05-31T23:59:59');
+        break;
+
+      case 'thisYear':
+        newStart = startOfYear(new Date('2025-01-01T00:00:00'));
+        newEnd = new Date('2025-05-31T23:59:59');
+        break;
+
+      case 'custom':
+        return; 
+      default:
+        newStart = startOfMonth(now);
+        newEnd = now;
     }
 
     setStartDate(newStart);
-    setEndDate(now);
+    setEndDate(newEnd);
   }, [timeRange]);
 
 const fetchData = async () => {
@@ -128,13 +148,13 @@ try {
 
       setLineChartOptions({
         chart: { type: 'line', height: 400 },
-        title: { text: 'Energy Consumption Over Time' },
+        title: { text: 'Electricity Consumption Over Time' },
         xAxis: {
           categories,
           labels: { rotation: -45, style: { fontSize: '10px' } }
         },
-        yAxis: { title: { text: 'Energy Consumed (kWh)' } },
-        series: [{ name: 'Energy', data: values }],
+        yAxis: { title: { text: 'Electricity Consumed (kWh)' } },
+        series: [{ name: 'Date', data: values }],
         tooltip: {
           formatter() {
             return `<b>${this.x}</b><br/>${this.series.name}: <b>${this.y.toFixed(2)} kWh</b>`;
@@ -152,8 +172,8 @@ try {
 
       setPieChartOptions({
         chart: { type: 'pie', height: 300 },
-        title: { text: 'Top 5 Spaces by Energy Consumption' },
-        series: [{ name: 'Energy Consumed (kWh)', data: pieSeries }],
+        title: { text: 'Top 5 Spaces by Electricity Consumption' },
+        series: [{ name: 'Electricity Consumed (kWh)', data: pieSeries }],
         tooltip: { pointFormat: '{series.name}: <b>{point.y:.2f} kWh</b>' },
         plotOptions: {
           pie: {
@@ -183,7 +203,7 @@ try {
 
       setHeatMapOptions({
         chart: { type: 'heatmap', height: 400 },
-        title: { text: 'Hourly Energy Consumption Heatmap' },
+        title: { text: 'Hourly Electricity Consumption Heatmap' },
         xAxis: {
           categories: [...Array(24).keys()],
           title: { text: 'Hour of Day' }
@@ -199,14 +219,14 @@ try {
           maxColor: '#FF0000'  
           },
         series: [{
-          name: 'Energy Consumed (kWh)',
+          name: 'Electricity Consumed (kWh)',
           borderWidth: 0.1,
           data: heatmapData,
           dataLabels: { enabled: false }
         }],
         tooltip: {
           formatter: function () {
-            return `<b>${days[this.point.y]}</b><br/>Hour: <b>${this.point.x}</b><br/>Energy: <b>${this.point.value.toFixed(2)} kWh</b>`;
+            return `<b>${days[this.point.y]}</b><br/>Hour: <b>${this.point.x}</b><br/>Electricity: <b>${this.point.value.toFixed(2)} kWh</b>`;
           }
         }
       });

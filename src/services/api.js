@@ -70,6 +70,12 @@ export const getAllSpaces = async () => {
   }
 };
 
+// POST /api/Sites
+export const createSite = async (siteData) => {
+  const response = await api.post('/Sites', siteData);
+  return response.data;
+};
+
 // Get the single site (GET /api/Sites/Single)
 export const getSingleSite = async () => {
   const response = await api.get('/Sites/Single');
@@ -78,7 +84,7 @@ export const getSingleSite = async () => {
 
 // Update the site (PUT /api/Sites/{id})
 export const updateSite = async (id, siteData) => {
-  const response = await api.put(`/Sites/${id}`, siteData);
+  const response = await api.put(`/Sites/{id}`, siteData);
   return response.data;
 };
 export default api;
