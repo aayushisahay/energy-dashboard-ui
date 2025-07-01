@@ -113,12 +113,10 @@ const fetchData = async () => {
   const s = startDate.toISOString();
   const e = endDate.toISOString();
 
-  // 🔁 Compute time difference in hours and days
   const diffInMs = endDate - startDate;
   const diffInHours = diffInMs / (1000 * 60 * 60);
   const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
 
-  // 📊 Determine grouping strategy
   let groupBy = 'year';
   if (diffInHours <= 24) groupBy = 'hour';
   else if (diffInDays <= 30) groupBy = 'day';
@@ -196,9 +194,9 @@ try {
 
       const days = [...new Set(heatmapDataRaw.map(d => d.day))];
       const heatmapData = heatmapDataRaw.map(d => [
-        d.hour,              // x - hour
-        days.indexOf(d.day), // y - day index
-        d.energy             // value
+        d.hour,              
+        days.indexOf(d.day), 
+        d.energy             
       ]);
 
       setHeatMapOptions({
@@ -242,7 +240,6 @@ try {
     fetchData();
   }, [selectedValues, startDate, endDate]);
 
-  // Card style
   const cardStyle = {
     backgroundColor: 'white',
     border: '1px solid #ddd',
@@ -271,12 +268,11 @@ try {
         <LoadingSpinner />
       ) : (
         <div className="dashboard-grid" style={{ display: 'grid', gap: '2rem' }}>
-          {/* Line Chart */}
+
           <div className="chart-card" style={cardStyle}>
             <LineChart options={lineChartOptions} />
           </div>
 
-          {/* Bottom row: Pie + Heatmap */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
             <div className="chart-card" style={cardStyle}>
               <PieChart options={pieChartOptions} />
