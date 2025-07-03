@@ -24,9 +24,6 @@ const ForgotPassword = () => {
       setError('Enter a valid email address');
       return;
     }
-
-  
-
     setSuccess('Password reset link has been sent to your email.');
   };
 

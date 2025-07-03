@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5130/api';
+const BASE_URL = 'https://localhost:7128/api';
 
 // Create Axios instance
 const api = axios.create({
@@ -31,14 +31,11 @@ export const loginUser = async (username, password) => {
 };
 
 // ========== ENERGY SUMMARY ========== //
-export const getEnergySummary = async (spaceIds, startTime, endTime, groupBy) => {
-  try {
-    const params = { spaceIds, startTime, endTime };
-    if (groupBy) {
-      params.groupBy = groupBy;
-    }
-
-    const response = await api.get('/MeterReadings/energy-summary', { params });
+export const getEnergySummary = async (spaceIds, startTime, endTime, granularity) => {
+ try {
+    const response = await api.get('/MeterReadings/energy-summary', {
+      params: { spaceIds, startTime, endTime, granularity }
+    });
     return response.data;
   } catch (error) {
     console.error('API Error (energy-summary):', error);

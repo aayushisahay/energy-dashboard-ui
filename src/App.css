@@ -1,14 +1,19 @@
 .App {
   text-align: center;
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
 }
 
 .App-logo {
   height: 40vmin;
   pointer-events: none;
 }
+html, body, #root {
+  min-height: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+}
+
+
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
@@ -17,7 +22,7 @@
 }
 
 .App-header {
-  background-color: #3a465d;
+  background-color: #282c34;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -40,52 +45,58 @@
   }
 }
 
-.sidebar {
-  background-color: #000000;
-  color: rgb(255, 255, 255);
-  width: 200px;
-  height: calc(175vh - 5rem); 
-  position: absolute;
-  top: 5rem; 
-  left: 0;
-  padding: 1rem;
-  overflow-y: auto;
-}
-
-.sidebar .nav-link {
-  color: rgb(255, 255, 255);
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-.sidebar .nav-link:hover {
-  color: #61dafb; 
-  text-decoration: none;
-}
-
-
-.app-header {
-  position: absolute;
-  top: 0;
-  left: 100;
-  width: 100%;
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f8f9fa;
-  padding: 12px 24px;
-  border-bottom: 1px solid #dee2e6;
+  margin: 0;
+  padding: 0;
+}
+
+h5, h2 {
+  font-weight: 600;
+}
+
+
+select {
+  padding: 6px;
+  font-size: 16px;
+}
+
+h2 {
+  margin-bottom: 8px;
+}
+ 
+.SideBar {
+  border-right: 1px solid #ddd;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
   z-index: 1000;
 }
 
-.app-title {
-  margin: 0;
-  font-size: 28px;
-  color:#000000;
-  font-weight: bold;
+.sidebar-link {
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  display: block;
+  white-space: nowrap;
+  transition: background 0.3s;
+  font-size: 15px;
 }
 
-.main-content {
-  margin-left: 100px;
-  margin-top: -20px; 
-  padding: 1rem;
-  min-height: 100vh;
-  background-color: #f1f3f6;
+.sidebar-link:hover {
+  background-color: rgba(255, 255, 255, 0.1); 
+}
+
+.sidebar-link.active {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-left: 4px solid #3fc1c9;
+}
+
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
 }
