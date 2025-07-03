@@ -1,37 +1,44 @@
 import React, { useEffect, useState } from 'react';
-import { getSingleSite, updateSite, createSite } from '../services/api';
+import { getSingleSite, createSite, updateSite, deleteSite } from '../services/api';
 
 const SiteForm = () => {
   const [formData, setFormData] = useState({
-    siteID: '',
+    siteId: '',
     siteName: '',
     address: '',
     contactPerson: '',
     contactEmail: '',
     contactPhone: ''
   });
+
   const [originalData, setOriginalData] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
-  const [siteExists, setSiteExists] = useState(false); // flag to disable Add after 1 entry
+  const [siteExists, setSiteExists] = useState(false);
 
-  // Fetch existing site on mount
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchSite = async () => {
       try {
         const site = await getSingleSite();
-        if (site?.siteID) {
-          setFormData(site);
-          setOriginalData(site);
-          setSiteExists(true);
-        }
+        const mappedSite = {
+          siteId: site.siteId || site.siteID || site.id,
+          siteName: site.siteName || '',
+          address: site.address || '',
+          contactPerson: site.contactPerson || '',
+          contactEmail: site.contactEmail || '',
+          contactPhone: site.contactPhone || ''
+        };
+
+        setFormData(mappedSite);
+        setOriginalData(mappedSite);
+        setSiteExists(true);
       } catch (err) {
-        console.error('No site found. You may add a new one.', err);
+        console.error('No site found:', err);
         setSiteExists(false);
       }
     };
 
-    fetchData();
+    fetchSite();
   }, []);
 
   const handleChange = (e) => {
@@ -39,14 +46,40 @@ const SiteForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleAdd = async () => {
+    try {
+      const { siteId, ...siteData } = formData; 
+      siteData.createdAt = new Date().toISOString();
+      const created = await createSite(siteData);
+
+      const newSiteId = created.siteId || created.siteID || created.id;
+      if (!newSiteId) throw new Error("Site ID missing in response");
+
+      const updated = { ...created, siteId: newSiteId };
+
+      setFormData(updated);
+      setOriginalData(updated);
+      setSiteExists(true);
+      setStatusMessage('Site added successfully.');
+    } catch (err) {
+      console.error('Add error:', err);
+      const msg = err.response?.data?.message || 'Failed to add site.';
+      setStatusMessage(msg);
+    }
+  };
+
   const handleSave = async () => {
     try {
-      await updateSite(formData.siteID, formData);
+      if (!formData.siteId) {
+        setStatusMessage("Cannot update: site ID missing.");
+        return;
+      }
+      await updateSite(formData.siteId, formData);
       setOriginalData(formData);
       setEditMode(false);
       setStatusMessage('Changes saved successfully.');
     } catch (err) {
-      console.error('Failed to update site:', err);
+      console.error('Update error:', err);
       const msg = err.response?.data?.message || 'Failed to save changes.';
       setStatusMessage(msg);
     }
@@ -55,30 +88,44 @@ const SiteForm = () => {
   const handleCancel = () => {
     setFormData(originalData);
     setEditMode(false);
-    setStatusMessage('Edits canceled.');
+    setStatusMessage('Changes canceled.');
   };
 
-  const handleAdd = async () => {
-  try {
-    console.log("Sending data to createSite API:", formData);
-    const newSite = await createSite(formData);
-    console.log("API Response:", newSite);
-    setFormData(newSite);
-    setOriginalData(newSite);
-    setSiteExists(true);
-    setStatusMessage('Site added successfully.');
-  } catch (err) {
-    console.error('Failed to add site:', err);
-    const msg = err.response?.data?.message || 'Failed to add site.';
-    setStatusMessage(msg);
-  }
-};
+  const handleDelete = async () => {
+    try {
+      await deleteSite(formData.siteId);
+      setFormData({
+        siteId: '',
+        siteName: '',
+        address: '',
+        contactPerson: '',
+        contactEmail: '',
+        contactPhone: ''
+      });
+      setOriginalData(null);
+      setEditMode(false);
+      setSiteExists(false);
+      setStatusMessage('Site deleted.');
+    } catch (err) {
+      console.error('Delete error:', err);
+      const msg = err.response?.data?.message || 'Failed to delete site.';
+      setStatusMessage(msg);
+    }
+  };
 
   return (
     <div className="main-content card p-4 mb-4" style={{ maxWidth: '600px' }}>
       <h4 className="mb-3">Site Settings</h4>
 
       <form>
+        {/* Show Site ID only when site exists */}
+        {siteExists && (
+          <div className="mb-3">
+            <label className="form-label">Site ID</label>
+            <input type="text" className="form-control" value={formData.siteId} disabled />
+          </div>
+        )}
+
         <div className="mb-3">
           <label className="form-label">Site Name</label>
           <input
@@ -87,7 +134,7 @@ const SiteForm = () => {
             name="siteName"
             value={formData.siteName}
             onChange={handleChange}
-            disabled={siteExists && !editMode}
+            disabled={!editMode && siteExists}
           />
         </div>
 
@@ -99,7 +146,7 @@ const SiteForm = () => {
             name="address"
             value={formData.address}
             onChange={handleChange}
-            disabled={siteExists && !editMode}
+            disabled={!editMode && siteExists}
           />
         </div>
 
@@ -111,7 +158,7 @@ const SiteForm = () => {
             name="contactPerson"
             value={formData.contactPerson}
             onChange={handleChange}
-            disabled={siteExists && !editMode}
+            disabled={!editMode && siteExists}
           />
         </div>
 
@@ -123,7 +170,7 @@ const SiteForm = () => {
             name="contactEmail"
             value={formData.contactEmail}
             onChange={handleChange}
-            disabled={siteExists && !editMode}
+            disabled={!editMode && siteExists}
           />
         </div>
 
@@ -135,29 +182,25 @@ const SiteForm = () => {
             name="contactPhone"
             value={formData.contactPhone}
             onChange={handleChange}
-            disabled={siteExists && !editMode}
+            disabled={!editMode && siteExists}
           />
         </div>
 
         <div className="d-flex gap-2">
-          <button
-            type="button"
-            className="btn btn-success"
-            onClick={handleAdd}
-            disabled={siteExists}
-          >
-            Add
-          </button>
+          {!siteExists && (
+            <button type="button" className="btn btn-success" onClick={handleAdd}>Add</button>
+          )}
 
-          {siteExists && (
-            editMode ? (
-              <>
-                <button type="button" className="btn btn-primary" onClick={handleSave}>Save</button>
-                <button type="button" className="btn btn-secondary" onClick={handleCancel}>Cancel</button>
-              </>
-            ) : (
-              <button type="button" className="btn btn-primary" onClick={() => setEditMode(true)}>Edit</button>
-            )
+          {siteExists && editMode && (
+            <>
+              <button type="button" className="btn btn-primary" onClick={handleSave}>Save</button>
+              <button type="button" className="btn btn-secondary" onClick={handleCancel}>Cancel</button>
+              <button type="button" className="btn btn-danger" onClick={handleDelete}>Delete</button>
+            </>
+          )}
+
+          {siteExists && !editMode && (
+            <button type="button" className="btn btn-primary" onClick={() => setEditMode(true)}>Edit</button>
           )}
         </div>
 
